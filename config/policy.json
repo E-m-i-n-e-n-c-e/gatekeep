@@ -1,0 +1,15 @@
+{
+  "default_action": "drop",
+  "rules": [
+    { "id": "quarantine-host", "action": "drop", "src": "10.10.1.66/32" },
+    { "id": "reject-telnet", "action": "reject", "proto": "tcp", "dst_ports": "23" },
+    { "id": "allow-dns", "action": "allow", "proto": "udp", "dst": "10.10.2.0/24", "dst_ports": "53" },
+    { "id": "allow-web", "action": "allow", "proto": "tcp", "dst": "10.10.2.0/24", "dst_ports": "80,443,8443" },
+    { "id": "allow-iperf", "action": "allow", "proto": "tcp", "dst": "10.10.2.0/24", "dst_ports": "5201-5204" },
+    { "id": "allow-iperf-udp", "action": "allow", "proto": "udp", "dst": "10.10.2.0/24", "dst_ports": "5201-5204" },
+    { "id": "allow-ping", "action": "allow", "proto": "icmp" }
+  ],
+  "blocked_domains": ["evil.test", "tracker.test"],
+  "rate_limit": { "new_flows_per_sec": 50, "burst": 100, "ban_after": 200, "ban_seconds": 30 },
+  "max_inspect_packets": 8
+}

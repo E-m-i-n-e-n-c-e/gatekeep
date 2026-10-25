@@ -1,0 +1,61 @@
+#!/usr/sbin/nft -f
+#
+# Kernel side of gatekeep. Packets being routed through this box (the
+# forward hook) hit this chain. Connections that already have a verdict are
+# handled right here in the kernel (fast path); everything else is sent to
+# the userspace engine over NFQUEUE 0 (slow path).
+#
+# The engine answers with NF_REPEAT and a packet mark, which runs the packet
+# through this chain again. The "meta mark" rules turn that answer into a
+# verdict and, for flow verdicts, cache it on the connection as its ct mark:
+#
+#   mark 1  allow flow    -> ct mark 1, accepted in the kernel from now on
+#   mark 2  drop flow     -> ct mark 2, dropped in the kernel from now on
+#   mark 3  allow packet  -> accept this packet only, keep inspecting
+#   mark 4  reject flow   -> ct mark 4, TCP RST / ICMP prohibited from now on
+#   mark 5  reject packet -> reject this packet only
+#
+# Only this table is replaced: Docker keeps its own rules in this network
+# namespace (embedded DNS), so no "flush ruleset".
+
+table inet gatekeep
+delete table inet gatekeep
+
+table inet gatekeep {
+    # Sources banned by the engine's rate limiter. Entries expire by themselves.
+    set banned {
+        type ipv4_addr
+        flags timeout
+    }
+
+    chain forward {
+        type filter hook forward priority filter; policy drop;
+
+        ct state invalid counter drop
+        ip saddr @banned counter drop
+
+        # Fast path: the connection already has a verdict.
+        ct mark 0x1 counter accept comment "fast path: allowed flows"
+        ct mark 0x2 counter drop
+        ct mark 0x4 counter jump reject_it
+
+        # Replies to connections that are still being inspected.
+        ct direction reply counter accept
+
+        # Verdicts coming back from the engine.
+        meta mark 0x1 ct mark set 0x1 counter accept
+        meta mark 0x2 ct mark set 0x2 counter drop
+        meta mark 0x3 counter accept
+        meta mark 0x4 ct mark set 0x4 counter jump reject_it
+        meta mark 0x5 counter jump reject_it
+
+        # Slow path: ask the engine. No "bypass": if the engine is not
+        # running, packets are dropped (fail closed).
+        counter queue num 0 comment "slow path: to userspace engine"
+    }
+
+    chain reject_it {
+        meta l4proto tcp reject with tcp reset
+        reject with icmpx admin-prohibited
+    }
+}

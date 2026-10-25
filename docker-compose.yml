@@ -1,0 +1,47 @@
+# Lab topology: the client and the server sit on separate networks, and the
+# only route between them is through the firewall container.
+#
+#   client 10.10.1.10 ── clientnet ── 10.10.1.2 [firewall] 10.10.2.2 ── servernet ── 10.10.2.10 server
+
+services:
+  firewall:
+    build:
+      context: .
+      dockerfile: docker/firewall.Dockerfile
+    cap_add: [NET_ADMIN]
+    sysctls:
+      net.ipv4.ip_forward: 1
+    ports:
+      - "127.0.0.1:8080:8080"  # control API
+    networks:
+      clientnet: { ipv4_address: 10.10.1.2 }
+      servernet: { ipv4_address: 10.10.2.2 }
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/lab.Dockerfile
+    entrypoint: ["/lab/server.sh"]
+    cap_add: [NET_ADMIN]
+    networks:
+      servernet: { ipv4_address: 10.10.2.10 }
+
+  client:
+    build:
+      context: .
+      dockerfile: docker/lab.Dockerfile
+    entrypoint: ["/lab/client.sh"]
+    cap_add: [NET_ADMIN, NET_RAW]
+    networks:
+      clientnet: { ipv4_address: 10.10.1.10 }
+    depends_on:
+      firewall: { condition: service_healthy }
+      server: { condition: service_started }
+
+networks:
+  clientnet:
+    ipam:
+      config: [{ subnet: 10.10.1.0/24 }]
+  servernet:
+    ipam:
+      config: [{ subnet: 10.10.2.0/24 }]
