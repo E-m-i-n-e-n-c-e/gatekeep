@@ -64,7 +64,7 @@ function Player({ replay }: { replay: Replay }) {
     }
   }, []);
 
-  // /live?scenario=<id> plays that scenario; /live?t=<seconds> opens paused at that moment.
+  // /demo?scenario=<id> plays that scenario; /demo?t=<seconds> opens paused at that moment.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const s = replay.scenarios.find((sc) => sc.id === params.get("scenario"));

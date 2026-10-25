@@ -2,6 +2,7 @@
 
 #include <httplib.h>
 
+#include <algorithm>
 #include <functional>
 #include <iostream>
 #include <regex>
@@ -30,28 +31,40 @@ void guarded(httplib::Response& res, const std::function<void()>& fn) {
 // existing connections are re-checked against the new policy, not just new ones.
 void policy_changed() { kernel_flush_conntrack(); }
 
-// The demo website calls this API from the browser. Only pages served from
-// this machine (localhost / 127.0.0.1, any port) may do so.
-bool local_origin(const std::string& origin) {
-    static const std::regex allowed(R"(^https?://(localhost|127\.0\.0\.1)(:[0-9]{1,5})?$)");
-    return std::regex_match(origin, allowed);
+// The website's live mode calls this API from the browser. Pages served from
+// this machine (localhost / 127.0.0.1, any port) may, plus configured origins.
+bool origin_allowed(const std::string& origin, const std::vector<std::string>& extra) {
+    static const std::regex local(R"(^https?://(localhost|127\.0\.0\.1)(:[0-9]{1,5})?$)");
+    return std::regex_match(origin, local) || std::find(extra.begin(), extra.end(), origin) != extra.end();
 }
 
 }  // namespace
 
-void run_api(Engine& engine, const std::string& host, int port, const std::string& policy_path) {
+void run_api(Engine& engine, const std::string& host, int port, const std::string& policy_path,
+             const std::vector<std::string>& cors_origins) {
     httplib::Server svr;
 
-    // ── CORS for the local demo website ──
-    svr.set_post_routing_handler([](const httplib::Request& req, httplib::Response& res) {
+    // ── CORS for the website's live mode ──
+    // Another site's page can still *send* a simple cross-site POST (CSRF)
+    // even though it can't read the answer, so refuse changes from any page
+    // whose origin isn't allowed. Requests without an Origin (curl, scripts) pass.
+    svr.set_pre_routing_handler([&](const httplib::Request& req, httplib::Response& res) {
         const std::string origin = req.get_header_value("Origin");
-        if (local_origin(origin)) {
+        if (req.method != "GET" && req.method != "OPTIONS" && !origin.empty() && !origin_allowed(origin, cors_origins)) {
+            reply(res, {{"error", "origin not allowed"}}, 403);
+            return httplib::Server::HandlerResponse::Handled;
+        }
+        return httplib::Server::HandlerResponse::Unhandled;
+    });
+    svr.set_post_routing_handler([&](const httplib::Request& req, httplib::Response& res) {
+        const std::string origin = req.get_header_value("Origin");
+        if (origin_allowed(origin, cors_origins)) {
             res.set_header("Access-Control-Allow-Origin", origin);
             res.set_header("Vary", "Origin");
         }
     });
-    svr.Options(R"(/.*)", [](const httplib::Request& req, httplib::Response& res) {
-        if (!local_origin(req.get_header_value("Origin"))) {
+    svr.Options(R"(/.*)", [&](const httplib::Request& req, httplib::Response& res) {
+        if (!origin_allowed(req.get_header_value("Origin"), cors_origins)) {
             res.status = 403;
             return;
         }

@@ -109,11 +109,28 @@ docker compose up -d --build   # builds the engine and runs its unit tests
 docker compose logs -f firewall
 ```
 
+Then start the website and open `http://localhost:3000/live` to drive the lab from the browser:
+
+```bash
+cd web && npm install && npm run dev
+```
+
 The engine logs one JSON line per decision:
 
 ```json
 {"app":"tls","dst":"10.10.2.10","dst_port":8443,"host":"cdn.evil.test","proto":"tcp","reason":"domain_blocked","rule":"allow-web","src":"10.10.1.10","src_port":47544,"verdict":"reject_flow"}
 ```
+
+## Live mode
+
+The website has two ways to show the firewall:
+
+- **Demo** replays a recorded session (`web/public/replay.json`, made by `scripts/record.py`). It needs no backend, so it works anywhere the site is hosted.
+- **Live** talks to a running firewall. It polls the control API for counters, decisions, bans and the policy, and starts scenarios through the lab's scenario runner (port 8081, in the client container), which streams each step's result back as it finishes. From the page you can also add and delete rules, block and unblock domains, lift bans, reset the policy and switch the fast path off and on.
+
+The runner only runs the fixed scenarios in `docker/lab/scenarios.py`, one at a time. The recorder uses the same runner, so the recording and the live buttons send identical traffic.
+
+Browsers may call the API and the runner only from pages on `localhost` or `127.0.0.1`. Requests that change something from any other site's page are refused, even ones a browser sends without asking first. To serve the website from another address against a hosted lab, build it with `NEXT_PUBLIC_GATEKEEP_API` and `NEXT_PUBLIC_GATEKEEP_RUNNER` set, and start the lab with that site in `GATEKEEP_CORS_ORIGINS`.
 
 ## Limitations
 

@@ -63,7 +63,7 @@ export default function Home() {
               packet after that is forwarded by the kernel alone.
             </p>
             <div className="hero-actions">
-              <Link href="/live" className="button button-primary">
+              <Link href="/demo" className="button button-primary">
                 Watch the recorded demo
               </Link>
               <Link href="/docs" className="button button-quiet">
@@ -178,7 +178,7 @@ export default function Home() {
               The demo page replays a real session: eleven scenarios, from an ordinary page load to a SYN flood, with
               every decision the engine made.
             </p>
-            <Link href="/live" className="button button-dark">
+            <Link href="/demo" className="button button-dark">
               Open the demo
             </Link>
           </div>

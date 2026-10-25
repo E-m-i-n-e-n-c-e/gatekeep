@@ -7,7 +7,9 @@
 #include <chrono>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <thread>
+#include <vector>
 
 #include "api.hpp"
 #include "engine.hpp"
@@ -21,10 +23,12 @@ struct Options {
     uint16_t queue = 0;
     std::string api_host = "0.0.0.0";
     int api_port = 8080;
+    std::vector<std::string> cors_origins;  // besides localhost, which is always allowed
 };
 
 [[noreturn]] void usage() {
-    std::cerr << "usage: gatekeep [--policy FILE] [--queue N] [--api-host HOST] [--api-port PORT]\n";
+    std::cerr << "usage: gatekeep [--policy FILE] [--queue N] [--api-host HOST] [--api-port PORT]\n"
+                 "                [--cors-origin ORIGIN[,ORIGIN...]]\n";
     std::exit(2);
 }
 
@@ -38,6 +42,11 @@ Options parse_args(int argc, char** argv) {
         else if (arg == "--queue") o.queue = uint16_t(std::stoi(value));
         else if (arg == "--api-host") o.api_host = value;
         else if (arg == "--api-port") o.api_port = std::stoi(value);
+        else if (arg == "--cors-origin") {
+            std::stringstream list(value);
+            for (std::string origin; std::getline(list, origin, ',');)
+                if (!origin.empty()) o.cors_origins.push_back(origin);
+        }
         else usage();
     }
     return o;
@@ -61,7 +70,7 @@ int main(int argc, char** argv) {
 
     Engine engine(std::move(policy));
 
-    std::thread([&] { run_api(engine, opt.api_host, opt.api_port, opt.policy_path); }).detach();
+    std::thread([&] { run_api(engine, opt.api_host, opt.api_port, opt.policy_path, opt.cors_origins); }).detach();
     std::thread([&] {
         for (;;) {
             std::this_thread::sleep_for(std::chrono::seconds(5));

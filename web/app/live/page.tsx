@@ -1,27 +1,23 @@
 import type { Metadata } from "next";
 
-import { LiveReplay } from "@/components/LiveReplay";
-import { loadReplay } from "@/lib/load";
+import { LiveConsole } from "@/components/LiveConsole";
 
 export const metadata: Metadata = {
-  title: "Demo: Gatekeep",
-  description: "A recorded session of the Gatekeep firewall: real commands, real decisions, real counters.",
+  title: "Live: Gatekeep",
+  description: "Drive a running Gatekeep firewall: send traffic, change rules and watch its decisions as they happen.",
 };
 
 export default function LivePage() {
-  const { recorded_at } = loadReplay();
-  const date = new Date(recorded_at).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
   return (
     <div className="wrap live">
       <header className="live-head">
-        <h1>Demo</h1>
+        <h1>Live</h1>
         <p>
-          A real session recorded on {date}: commands sent from a client container through the firewall to a server,
-          with every decision the engine made and the kernel&apos;s packet counters. Gatekeep needs a Linux kernel to
-          run, so this page plays the recording back. To run it live, see the <a href="/docs#run-it">setup guide</a>.
+          Connected to a running firewall, everything here is happening now: run a scenario to send real traffic through
+          it, change its rules, and watch its decisions and packet counters update.
         </p>
       </header>
-      <LiveReplay />
+      <LiveConsole />
     </div>
   );
 }

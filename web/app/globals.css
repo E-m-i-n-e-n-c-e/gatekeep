@@ -1323,3 +1323,259 @@ pre {
   font-size: var(--step--1);
   overflow-wrap: anywhere;
 }
+
+/* ── Live mode ──────────────────────────────────────────── */
+
+.live-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  background: var(--concrete);
+  border-bottom: 1px solid var(--rule);
+}
+
+.conn-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.conn-state.is-up {
+  color: var(--fast);
+}
+
+.conn-state.is-down {
+  color: var(--stop);
+}
+
+.live-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.live-actions .button-quiet {
+  color: var(--ink);
+}
+
+/* A labelled toggle switch built on a real checkbox. */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding-right: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.switch input {
+  appearance: none;
+  width: 44px;
+  height: 26px;
+  margin: 0;
+  border-radius: 13px;
+  background: var(--inspect);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.switch input::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sign-white);
+  transition: transform 0.15s;
+}
+
+.switch input:checked {
+  background: var(--fast);
+}
+
+.switch input:checked::after {
+  transform: translateX(18px);
+}
+
+.live-notice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  background: var(--sign-white);
+  border-left: 3px solid var(--lane-yellow);
+  border-radius: 4px;
+}
+
+.live-notice button,
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ink-3);
+  cursor: pointer;
+}
+
+.live-notice button:hover,
+.icon-button:hover {
+  background: var(--concrete);
+  color: var(--stop);
+}
+
+.live-error {
+  margin-top: 12px;
+  color: var(--stop);
+  font-weight: 600;
+}
+
+.scenario:disabled {
+  cursor: not-allowed;
+  color: var(--ink-3);
+}
+
+.scenario.is-active:disabled {
+  color: var(--ink);
+}
+
+.rule-live {
+  grid-template-columns: 58px 1fr auto;
+}
+
+.rule-live .icon-button {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.live-form,
+.inline-form {
+  margin-top: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 10px;
+}
+
+.live-form label {
+  display: grid;
+  gap: 2px;
+  font-size: var(--step--1);
+  color: var(--ink-2);
+}
+
+.live-form input,
+.live-form select,
+.inline-form input {
+  min-height: 40px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--rule);
+  border-radius: 6px;
+  background: var(--sign-white);
+  font: inherit;
+  color: var(--ink);
+}
+
+.live-form input:disabled {
+  background: var(--concrete);
+}
+
+.inline-form {
+  display: flex;
+  gap: 8px;
+}
+
+.inline-form input {
+  flex: 1;
+  min-width: 0;
+}
+
+.domains-live {
+  list-style: none;
+  padding: 0;
+}
+
+.domains-live li {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-right: 2px;
+  border-radius: 4px;
+  background: var(--concrete);
+}
+
+.domains-live code {
+  background: transparent;
+}
+
+.ban-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.ban-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.ban-list .button-quiet {
+  color: var(--ink);
+  min-height: 36px;
+  padding: 6px 12px;
+}
+
+.decision-live {
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.setup-steps {
+  margin: 16px 0 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 8px;
+}
+
+.setup-steps code {
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--concrete);
+  overflow-wrap: anywhere;
+}
+
+.run-all {
+  width: 100%;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.run-all.button-quiet {
+  color: var(--ink);
+}
+
+.run-all:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

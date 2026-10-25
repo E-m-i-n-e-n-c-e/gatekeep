@@ -6,4 +6,5 @@ set -e
 nft -f /etc/gatekeep/gatekeep.nft
 echo "gatekeep: nftables rules loaded"
 
-exec gatekeep --policy /etc/gatekeep/policy.json --queue 0 --api-host 0.0.0.0 --api-port 8080
+exec gatekeep --policy /etc/gatekeep/policy.json --queue 0 --api-host 0.0.0.0 --api-port 8080 \
+    --cors-origin "${GATEKEEP_CORS_ORIGINS:-}"

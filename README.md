@@ -85,6 +85,17 @@ A log line per decision:
 {"app":"tls","dst":"10.10.2.10","dst_port":8443,"host":"cdn.evil.test","proto":"tcp","reason":"domain_blocked","rule":"allow-web","src":"10.10.1.10","src_port":47544,"ts":"2026-10-25T05:32:00.084Z","verdict":"reject_flow"}
 ```
 
+## Website: demo and live mode
+
+`web/` is a static Next.js site: how it works, docs, a **Demo** page that replays a recorded session, and a **Live** page that drives a running lab from the browser (run scenarios, edit rules and domains, lift bans, toggle the fast path, watch decisions and counters as they happen).
+
+```bash
+cd web && npm install && npm run dev   # open http://localhost:3000/live with the lab running
+python3 scripts/record.py              # re-record the Demo page's session
+```
+
+Live mode reaches the control API (8080) and a scenario runner in the client container (8081). Both accept browser calls only from `localhost` pages, plus any origins in `GATEKEEP_CORS_ORIGINS`; the site's targets are set with `NEXT_PUBLIC_GATEKEEP_API` and `NEXT_PUBLIC_GATEKEEP_RUNNER`.
+
 ## Control API
 
 Served on `127.0.0.1:8080`.
@@ -99,6 +110,7 @@ Served on `127.0.0.1:8080`.
 | GET / DELETE | `/bans`, `/bans/{ip}` | Show or lift rate-limit bans |
 | GET / PUT | `/config` | `{"fast_path": false}` sends every packet through the engine (for benchmarking) |
 | GET | `/flows`, `/events`, `/stats`, `/metrics` | Pending flows, recent decisions, counters, Prometheus metrics |
+| GET | `/kernel` | nftables packet counters: fast path, slow path, banned drops |
 
 ```bash
 curl -X POST 'localhost:8080/rules?position=0' \
@@ -118,12 +130,14 @@ engine/src/
   rules.cpp       rules, CIDRs, port ranges, policy JSON
   ratelimit.hpp   token bucket per source IP
   engine.cpp      the decision logic: new flows, pending inspection, bans, stats
-  api.cpp         REST control plane (cpp-httplib)
+  api.cpp         REST control plane (cpp-httplib), CORS for the website
   kernel.cpp      nft / conntrack side effects (bans, flushes)
 engine/tests/     unit tests (parsers, rules, engine), run during the Docker build
 nft/gatekeep.nft  kernel ruleset: fast path, verdict marks, the queue
 config/policy.json
-docker/, docker-compose.yml, scripts/
+docker/lab/      lab hosts; scenarios.py + runner.py drive the website's live mode
+web/             website: how it works, docs, recorded demo, live mode
+docker-compose.yml, scripts/
 ```
 
 ## Limitations
