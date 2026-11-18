@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CheckIcon, CrossIcon, OutcomeTag } from "./Icons";
-import { API_URL, ApiError, RUNNER_URL, call, canConnect } from "@/lib/endpoints";
+import { API_URL, ApiError, RUNNER_URL, call } from "@/lib/endpoints";
 import { clock, explain } from "@/lib/explain";
 import {
   initBaseline,
@@ -23,7 +23,7 @@ import { GITHUB } from "@/lib/site";
 
 const POLL_MS = 700;
 
-type Status = "checking" | "connected" | "offline" | "unavailable";
+type Status = "checking" | "connected" | "offline";
 
 interface Kernel {
   fast: number;
@@ -75,17 +75,13 @@ export function LiveConsole() {
       call<{ busy: boolean }>(RUNNER_URL, "GET", "/health").then((h) => setRunnerBusy(h.busy), () => setRunnerBusy(false));
       return true;
     } catch {
-      setStatus((prev) => (prev === "unavailable" ? prev : "offline"));
+      setStatus("offline");
       return false;
     }
   }, []);
 
   // Poll while connected; retry every few seconds while offline.
   useEffect(() => {
-    if (!canConnect()) {
-      setStatus("unavailable");
-      return;
-    }
     let alive = true;
     const loop = async () => {
       const ok = await refresh();
@@ -123,7 +119,6 @@ export function LiveConsole() {
     refresh();
   };
 
-  if (status === "unavailable") return <Unavailable />;
   if (status === "checking" && !snap) return <p className="replay-empty">Looking for a firewall at {API_URL}…</p>;
   if (!snap || !baseline) return <Offline />;
 
@@ -462,19 +457,6 @@ function LivePolicy({
         </ul>
       )}
     </section>
-  );
-}
-
-function Unavailable() {
-  return (
-    <div className="stage-empty live-setup">
-      <h2>Live mode runs against your own lab</h2>
-      <p>
-        This copy of the site is on the internet, so it can&apos;t reach a firewall on your computer. Watch the{" "}
-        <Link href="/demo">recorded demo</Link>, or run everything locally:
-      </p>
-      <Setup />
-    </div>
   );
 }
 

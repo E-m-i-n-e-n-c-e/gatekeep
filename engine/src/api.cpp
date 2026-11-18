@@ -70,6 +70,9 @@ void run_api(Engine& engine, const std::string& host, int port, const std::strin
         }
         res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
         res.set_header("Access-Control-Allow-Headers", "Content-Type");
+        // Chrome asks before a public page may reach this machine (localhost).
+        if (req.has_header("Access-Control-Request-Private-Network"))
+            res.set_header("Access-Control-Allow-Private-Network", "true");
         res.status = 204;
     });
 

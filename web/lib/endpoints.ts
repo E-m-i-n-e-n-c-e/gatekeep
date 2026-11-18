@@ -4,18 +4,6 @@
 export const API_URL = (process.env.NEXT_PUBLIC_GATEKEEP_API ?? "http://127.0.0.1:8080").replace(/\/$/, "");
 export const RUNNER_URL = (process.env.NEXT_PUBLIC_GATEKEEP_RUNNER ?? "http://127.0.0.1:8081").replace(/\/$/, "");
 
-const CONFIGURED = Boolean(process.env.NEXT_PUBLIC_GATEKEEP_API);
-
-/**
- * Whether this page may try to reach the backend. A public page reaching for
- * 127.0.0.1 triggers the browser's local-network permission prompt, so the
- * public site only does it when a backend address was configured.
- */
-export function canConnect(): boolean {
-  const host = window.location.hostname;
-  return host === "localhost" || host === "127.0.0.1" || CONFIGURED;
-}
-
 export class ApiError extends Error {
   constructor(
     message: string,

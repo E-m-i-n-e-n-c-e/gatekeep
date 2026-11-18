@@ -88,6 +88,9 @@ class Handler(BaseHTTPRequestHandler):
         self.cors()
         self.send_header("Access-Control-Allow-Methods", "GET, POST")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        # Chrome asks before a public page may reach this machine (localhost).
+        if self.headers.get("Access-Control-Request-Private-Network"):
+            self.send_header("Access-Control-Allow-Private-Network", "true")
         self.end_headers()
 
     def do_GET(self):
