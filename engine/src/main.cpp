@@ -2,7 +2,7 @@
 //
 //   nftables (kernel) ──first packets of new flows──► this process ──verdict──► kernel
 //
-// See ../../README.md for the architecture and ../../WALKTHROUGH.md for a tour of the code.
+// See ../../README.md and https://gatekeep.akhilk.in/docs for how it fits together.
 
 #include <chrono>
 #include <cstring>

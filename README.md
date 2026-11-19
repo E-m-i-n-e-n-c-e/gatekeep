@@ -1,8 +1,12 @@
 # gatekeep
 
+**Website, live demo and full docs: [gatekeep.akhilk.in](https://gatekeep.akhilk.in/)**
+
 A stateful L3–L7 firewall for Linux, written in C++17. The kernel (nftables) handles packet forwarding. A userspace engine reached over **NFQUEUE** decides each new connection using L3/L4 rules, per-source rate limits, and the domain the connection is going to, which it reads from the TLS ClientHello (SNI), the HTTP Host header, or the DNS query.
 
 The core design choice is a **slow path / fast path split**. Only the first few packets of each connection go to the engine. Once it decides, the verdict is cached on the kernel's conntrack entry, and the rest of the connection never leaves the kernel.
+
+In other words, the kernel keeps a per-connection cache of decisions. A packet whose connection has a stored verdict (its ct mark) is handled by the kernel alone. A packet with none is queued to the engine, which replies with `NF_REPEAT` and a packet mark; a rule copies that mark onto the connection, so every later packet is a cache hit. The [docs](https://gatekeep.akhilk.in/docs) explain each Linux piece involved, the path of a packet, rate limiting and the lab, with diagrams.
 
 ```
                          ┌───────────────────────── kernel (nftables, forward hook) ─────────────────────────┐
@@ -149,4 +153,4 @@ docker-compose.yml, scripts/
 - `reject` resets the client only. The server keeps a half-open connection until it times out ("reset-both" would fix that).
 - Rate limiting is per source IP, so a flood with spoofed, random source addresses spreads across buckets. That case calls for SYN cookies and a global limit.
 
-[WALKTHROUGH.md](WALKTHROUGH.md) goes through the code and the design decisions in detail.
+The [docs](https://gatekeep.akhilk.in/docs) go through the design in detail.

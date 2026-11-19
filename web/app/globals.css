@@ -1186,11 +1186,30 @@ pre {
   margin-bottom: 16px;
 }
 
+.docs-toc {
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+}
+
+.docs-group + .docs-group {
+  margin-top: 22px;
+}
+
+.docs-group h2 {
+  font-size: var(--step-0);
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+
 .docs-toc ol {
   list-style: none;
   margin: 0;
   padding: 0;
   border-left: 2px solid var(--rule);
+}
+
+.docs-toc-compact {
+  display: none;
 }
 
 .docs-toc a {
@@ -1273,14 +1292,152 @@ pre {
   margin-bottom: 16px;
 }
 
+/* The two halves of the page: explanation, then reference. */
+.docs-part-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: var(--step-1);
+  color: var(--ink-3);
+  margin: 0 0 8px;
+}
+
+.docs-part + .docs-part {
+  margin-top: 88px;
+  padding-top: 28px;
+  border-top: 3px solid var(--asphalt);
+}
+
+.prose h3 {
+  font-size: var(--step-1);
+  margin: 28px 0 10px;
+}
+
+/* "What it is / Think of it as / Why / In Gatekeep" cards for the Linux pieces. */
+.prose .piece {
+  margin: 18px 0;
+  padding: 2px 20px 8px;
+  background: var(--sign-white);
+  border-radius: 8px;
+  box-shadow: inset 4px 0 0 var(--asphalt);
+}
+
+.prose .piece h3 {
+  margin: 16px 0 10px;
+}
+
+.prose .piece dl {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 8px 18px;
+  margin: 0 0 8px;
+}
+
+.prose .piece dt {
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
+.prose .piece dd {
+  margin: 0;
+}
+
+/* Hand-drawn SVG diagrams. */
+.prose .diagram {
+  margin: 22px 0 26px;
+  padding: 18px;
+  background: var(--sign-white);
+  border-radius: 8px;
+}
+
+.diagram-scroll {
+  overflow-x: auto;
+}
+
+.diagram svg {
+  display: block;
+  width: 100%;
+  min-width: 620px;
+  height: auto;
+  overflow: visible;
+  color: var(--ink);
+}
+
+.diagram figcaption {
+  margin-top: 12px;
+  color: var(--ink-2);
+  font-size: var(--step--1);
+}
+
+.diagram text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  fill: currentColor;
+}
+
+.diagram .d-small { font-size: 11.5px; fill: var(--ink-3); }
+.diagram .d-bold { font-weight: 600; }
+.diagram .d-tfast { fill: var(--fast); }
+.diagram .d-tslow { fill: var(--inspect); }
+.diagram .d-box { fill: var(--concrete); stroke: currentColor; stroke-width: 1.3; }
+.diagram .d-soft { fill: none; stroke: var(--rule); stroke-width: 1.3; stroke-dasharray: 5 4; }
+.diagram .d-fast-box { fill: none; stroke: var(--fast); stroke-width: 2; }
+.diagram .d-slow-box { fill: none; stroke: var(--inspect); stroke-width: 2; }
+.diagram .d-line { stroke: currentColor; stroke-width: 1.4; fill: none; }
+.diagram .d-line-fast { stroke: var(--fast); stroke-width: 2; fill: none; }
+.diagram .d-line-slow { stroke: var(--inspect); stroke-width: 2; fill: none; }
+.diagram .d-dash { stroke-dasharray: 5 4; }
+.diagram .d-ah { fill: currentColor; }
+.diagram .d-ah-fast { fill: var(--fast); }
+.diagram .d-ah-slow { fill: var(--inspect); }
+
 @media (max-width: 860px) {
   .docs {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: 20px;
+    padding-top: 32px;
   }
 
   .docs-toc {
     position: static;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* Phones: the contents become one collapsible box. */
+  .docs-toc-full {
+    display: none;
+  }
+
+  .docs-toc-compact {
+    display: block;
+    background: var(--sign-white);
+    border-radius: 8px;
+    padding: 0 14px;
+  }
+
+  .docs-toc-compact > summary {
+    min-height: 44px;
+    padding: 11px 0;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .docs-toc-compact[open] > summary {
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 12px;
+  }
+
+  .docs-toc-compact .docs-group:last-child {
+    margin-bottom: 14px;
+  }
+
+  .prose .piece dl {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+
+  .prose .piece dd {
+    margin-bottom: 10px;
   }
 }
 
